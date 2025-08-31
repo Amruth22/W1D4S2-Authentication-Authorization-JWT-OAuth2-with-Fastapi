@@ -118,20 +118,23 @@ class CoreJWTAuthTests(unittest.TestCase):
         self.assertTrue(callable(self.check_rate_limit))
         self.assertTrue(callable(self.increment_login_attempts))
         
+        # Import functions directly for testing
+        from main import hash_password, verify_password, create_access_token, check_rate_limit, increment_login_attempts
+        
         # Test password hashing functionality
         test_password = "test_password_123"
-        hashed = self.hash_password(test_password)
+        hashed = hash_password(test_password)
         self.assertIsInstance(hashed, str)
         self.assertNotEqual(hashed, test_password)
         self.assertGreater(len(hashed), 50)  # bcrypt hashes are long
         
         # Test password verification
-        self.assertTrue(self.verify_password(test_password, hashed))
-        self.assertFalse(self.verify_password("wrong_password", hashed))
+        self.assertTrue(verify_password(test_password, hashed))
+        self.assertFalse(verify_password("wrong_password", hashed))
         
         # Test JWT token creation
         test_data = {"sub": "test_user"}
-        token = self.create_access_token(test_data)
+        token = create_access_token(test_data)
         self.assertIsInstance(token, str)
         self.assertGreater(len(token), 100)  # JWT tokens are long
         
@@ -140,8 +143,8 @@ class CoreJWTAuthTests(unittest.TestCase):
         self.assertEqual(len(token_parts), 3)
         
         # Test rate limiting functions
-        self.assertTrue(self.check_rate_limit("new_user"))
-        self.increment_login_attempts("test_user")
+        self.assertTrue(check_rate_limit("new_user"))
+        increment_login_attempts("test_user")
         self.assertIn("test_user", self.login_attempts)
         
         print("PASS: FastAPI application initialized")
